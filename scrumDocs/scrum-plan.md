@@ -1,6 +1,6 @@
 # Plan de Requerimientos — fitPM
 
-_Generado automáticamente el 2026-10-02T15:42:09.210Z — no editar a mano, se sobreescribe en cada publicación._
+_Generado automáticamente el 2026-10-02T15:42:26.104Z — no editar a mano, se sobreescribe en cada publicación._
 
 Orden sugerido de desarrollo (respeta dependencias entre Requerimientos). Cada fila indica de qué Requerimientos depende, si tiene.
 
