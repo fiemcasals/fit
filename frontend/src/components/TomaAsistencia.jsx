@@ -11,6 +11,14 @@ export default function TomaAsistencia() {
   const [message, setMessage] = useState(null);
   const [filterText, setFilterText] = useState('');
 
+  // Novedades de la jornada (RF-04)
+  const [novedad, setNovedad] = useState({
+    estado_clase: 'normal',
+    observaciones: '',
+  });
+  const [resumenMensual, setResumenMensual] = useState(null);
+  const [savingNovedad, setSavingNovedad] = useState(false);
+
   // Cargar lista de clases
   useEffect(() => {
     async function loadActividades() {
@@ -28,16 +36,37 @@ export default function TomaAsistencia() {
     loadActividades();
   }, []);
 
-  // Cargar planilla de la clase seleccionada para la fecha
+  // Cargar planilla de la clase y novedad del día
   const loadPlanilla = useCallback(async () => {
     if (!selectedClaseId) return;
     setLoading(true);
     setMessage(null);
     try {
-      const data = await api.getPlanillaClase(selectedClaseId, fecha);
-      setPlanilla(data);
+      const [dataPlanilla, dataNovedades] = await Promise.all([
+        api.getPlanillaClase(selectedClaseId, fecha),
+        api.getNovedades({ clase: selectedClaseId, fecha }),
+      ]);
+      setPlanilla(dataPlanilla);
+
+      const itemsNov = Array.isArray(dataNovedades) ? dataNovedades : dataNovedades.results || [];
+      if (itemsNov.length > 0) {
+        setNovedad({
+          estado_clase: itemsNov[0].estado_clase,
+          observaciones: itemsNov[0].observaciones || '',
+        });
+      } else {
+        setNovedad({
+          estado_clase: 'normal',
+          observaciones: '',
+        });
+      }
+
+      // Cargar resumen mensual de novedades
+      const [year, month] = fecha.split('-');
+      const dataResumen = await api.getResumenMensualNovedades(selectedClaseId, month, year);
+      setResumenMensual(dataResumen);
     } catch (err) {
-      console.error('Error al cargar planilla:', err);
+      console.error('Error al cargar planilla/novedades:', err);
       setMessage({ type: 'error', text: 'Error al cargar planilla de asistencia' });
     } finally {
       setLoading(false);
@@ -50,10 +79,36 @@ export default function TomaAsistencia() {
     }
   }, [selectedClaseId, fecha, loadPlanilla]);
 
+  // Guardar novedad de la jornada
+  const handleGuardarNovedad = async (nuevoEstado = novedad.estado_clase, nuevasObs = novedad.observaciones) => {
+    if (!selectedClaseId || !fecha) return;
+    setSavingNovedad(true);
+    try {
+      await api.registrarNovedadJornada({
+        clase_id: parseInt(selectedClaseId, 10),
+        fecha,
+        estado_clase: nuevoEstado,
+        observaciones: nuevasObs,
+      });
+      setMessage({
+        type: 'success',
+        text: 'Novedad de jornada actualizada correctamente.',
+      });
+      const [year, month] = fecha.split('-');
+      const dataResumen = await api.getResumenMensualNovedades(selectedClaseId, month, year);
+      setResumenMensual(dataResumen);
+    } catch (err) {
+      console.error('Error al registrar novedad:', err);
+      setMessage({ type: 'error', text: 'Error al guardar la novedad de jornada' });
+    } finally {
+      setSavingNovedad(false);
+    }
+  };
+
   // Alternar estado de un alumno individual con persistencia instantánea
   const handleToggle = async (alumnoId, currentEstado) => {
     const nuevoEstado = currentEstado === 'presente' ? 'ausente' : 'presente';
-    
+
     // Actualización optimista local
     setPlanilla((prev) => {
       if (!prev) return prev;
@@ -75,7 +130,6 @@ export default function TomaAsistencia() {
     } catch (err) {
       console.error('Error al guardar asistencia:', err);
       setMessage({ type: 'error', text: 'Error al sincronizar asistencia' });
-      // Revertir recargando
       loadPlanilla();
     }
   };
@@ -124,6 +178,7 @@ export default function TomaAsistencia() {
   const presentes = planilla?.presentes || 0;
   const ausentes = planilla?.ausentes || 0;
   const porcentaje = total > 0 ? Math.round((presentes / total) * 100) : 0;
+  const isClaseSuspendida = novedad.estado_clase !== 'normal';
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '40px' }}>
@@ -141,10 +196,10 @@ export default function TomaAsistencia() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
           <div>
             <h2 style={{ margin: '0 0 4px 0', fontSize: '1.25rem', color: 'var(--color-primary)' }}>
-              📋 Toma de Asistencia Diaria
+              📋 Toma de Asistencia Diaria y Novedades
             </h2>
             <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-              Selecciona la clase y fecha para registrar y sincronizar el presentismo en tiempo real.
+              Selecciona la clase y fecha para registrar presentismo, suspensiones y novedades de la jornada.
             </p>
           </div>
 
@@ -208,6 +263,92 @@ export default function TomaAsistencia() {
             🔄 Actualizar
           </button>
         </div>
+      </div>
+
+      {/* Banner de Estado de la Jornada / Registro de Novedades (RF-04) */}
+      <div
+        style={{
+          background: isClaseSuspendida ? 'var(--color-warning-light)' : 'var(--bg-surface)',
+          padding: '16px 20px',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-card)',
+          border: isClaseSuspendida ? '1.5px solid var(--color-warning)' : '1px solid var(--border-subtle)',
+          marginBottom: '20px',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '1.25rem' }}>{isClaseSuspendida ? '⚠️' : '⚡'}</span>
+            <span style={{ fontSize: '0.925rem', fontWeight: 700, color: isClaseSuspendida ? 'var(--color-warning)' : 'var(--color-primary)' }}>
+              Estado de la Jornada (Novedades y Suspensiones)
+            </span>
+          </div>
+
+          {resumenMensual && (
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+              Mes: <strong>{resumenMensual.clases_dictadas} dictadas</strong> | <strong>{resumenMensual.clases_suspendidas} suspendidas</strong>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px' }}>
+          <label style={{ fontSize: '0.8125rem', fontWeight: 600 }}>Condición:</label>
+          <select
+            value={novedad.estado_clase}
+            onChange={(e) => {
+              const val = e.target.value;
+              setNovedad((prev) => ({ ...prev, estado_clase: val }));
+              handleGuardarNovedad(val, novedad.observaciones);
+            }}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-subtle)',
+              fontFamily: 'inherit',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              backgroundColor: 'var(--bg-surface)',
+            }}
+          >
+            <option value="normal">🟢 Dictada Normal</option>
+            <option value="suspendida_luz">🔴 Suspendida por Corte de Luz</option>
+            <option value="suspendida_clima">🌧️ Suspendida por Clima / Lluvia</option>
+            <option value="feriado">🎌 Feriado / Sin Actividad</option>
+            <option value="paro">🛑 Medida de Fuerza / Paro</option>
+            <option value="otro">📝 Otra Causa</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Observaciones de la jornada (ej: corte de luz en el predio, lluvia torrencial)..."
+            value={novedad.observaciones}
+            onChange={(e) => setNovedad((prev) => ({ ...prev, observaciones: e.target.value }))}
+            onBlur={() => handleGuardarNovedad(novedad.estado_clase, novedad.observaciones)}
+            style={{
+              flex: 1,
+              minWidth: '220px',
+              padding: '8px 12px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-subtle)',
+              fontSize: '0.875rem',
+            }}
+          />
+
+          <button
+            className="btn btn-primary"
+            onClick={() => handleGuardarNovedad(novedad.estado_clase, novedad.observaciones)}
+            disabled={savingNovedad}
+            style={{ padding: '8px 14px', fontSize: '0.8125rem' }}
+          >
+            {savingNovedad ? 'Guardando...' : 'Guardar Novedad'}
+          </button>
+        </div>
+
+        {isClaseSuspendida && (
+          <div style={{ fontSize: '0.8125rem', color: 'var(--color-warning)', fontWeight: 600 }}>
+            ℹ️ Esta jornada está registrada como NO COMPUTABLE para el promedio de asistencia mensual.
+          </div>
+        )}
       </div>
 
       {/* Banner de Mensajes */}

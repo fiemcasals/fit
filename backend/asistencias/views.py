@@ -177,3 +177,108 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
             'clases_con_asistencia': clases_con_asistencia,
             'porcentaje_asistencia': round((presentes / total * 100), 1) if total > 0 else 0
         })
+
+
+class NovedadClaseViewSet(viewsets.ModelViewSet):
+    """
+    API ViewSet para Novedades y Suspensiones de Clase (RF-04 / REQ-1790949656976).
+    Endpoints:
+    - GET /api/novedades/ -> Listado de novedades (filtros por clase, fecha, mes, anio)
+    - POST /api/novedades/ -> Crear novedad
+    - PUT/PATCH /api/novedades/{id}/ -> Actualizar novedad
+    - POST /api/novedades/registrar_jornada/ -> Registrar o actualizar novedad de una clase en una fecha
+    - GET /api/novedades/resumen_mensual/?clase=ID&mes=MM&anio=YYYY -> Cómputo de días hábiles y clases dictadas
+    """
+    from .models import NovedadClase
+    from .serializers import NovedadClaseSerializer
+    queryset = NovedadClase.objects.select_related('clase').all()
+    serializer_class = NovedadClaseSerializer
+
+    def get_queryset(self):
+        from .models import NovedadClase
+        queryset = NovedadClase.objects.select_related('clase').all()
+        clase_id = self.request.query_params.get('clase')
+        fecha = self.request.query_params.get('fecha')
+        mes = self.request.query_params.get('mes')
+        anio = self.request.query_params.get('anio')
+
+        if clase_id:
+            queryset = queryset.filter(clase_id=clase_id)
+        if fecha:
+            queryset = queryset.filter(fecha=fecha)
+        if mes and anio:
+            queryset = queryset.filter(fecha__year=anio, fecha__month=mes)
+
+        return queryset
+
+    @action(detail=False, methods=['post'])
+    def registrar_jornada(self, request):
+        """Crea o actualiza la novedad de una clase para una fecha específica."""
+        from .models import NovedadClase
+        from .serializers import NovedadClaseSerializer
+        clase_id = request.data.get('clase_id')
+        fecha_str = request.data.get('fecha')
+        estado_clase = request.data.get('estado_clase', 'normal')
+        observaciones = request.data.get('observaciones', '')
+
+        if not clase_id or not fecha_str:
+            return Response({'error': 'clase_id y fecha son obligatorios'}, status=status.HTTP_400_BAD_REQUEST)
+
+        novedad, created = NovedadClase.objects.update_or_create(
+            clase_id=clase_id,
+            fecha=fecha_str,
+            defaults={
+                'estado_clase': estado_clase,
+                'observaciones': observaciones
+            }
+        )
+
+        serializer = NovedadClaseSerializer(novedad)
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'])
+    def resumen_mensual(self, request):
+        """Calcula los días dictados, suspendidos y el impacto en el cómputo mensual."""
+        from .models import NovedadClase
+        clase_id = request.query_params.get('clase')
+        mes = request.query_params.get('mes') or date.today().month
+        anio = request.query_params.get('anio') or date.today().year
+
+        if not clase_id:
+            return Response({'error': 'El parámetro clase es obligatorio'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            clase = Actividad.objects.get(id=clase_id)
+        except Actividad.DoesNotExist:
+            return Response({'error': 'Clase no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+        novedades = NovedadClase.objects.filter(clase=clase, fecha__year=anio, fecha__month=mes)
+
+        total_registradas = novedades.count()
+        dictadas_normal = novedades.filter(estado_clase='normal').count()
+        suspendidas_luz = novedades.filter(estado_clase='suspendida_luz').count()
+        suspendidas_clima = novedades.filter(estado_clase='suspendida_clima').count()
+        feriados = novedades.filter(estado_clase='feriado').count()
+        otros = novedades.filter(estado_clase__in=['paro', 'otro']).count()
+
+        total_suspendidas = total_registradas - dictadas_normal
+
+        return Response({
+            'clase': {
+                'id': clase.id,
+                'nombre': clase.nombre,
+                'horario': clase.horario
+            },
+            'mes': int(mes),
+            'anio': int(anio),
+            'total_jornadas_registradas': total_registradas,
+            'clases_dictadas': dictadas_normal,
+            'clases_suspendidas': total_suspendidas,
+            'desglose': {
+                'normal': dictadas_normal,
+                'suspendida_luz': suspendidas_luz,
+                'suspendida_clima': suspendidas_clima,
+                'feriado': feriados,
+                'otros': otros
+            }
+        })

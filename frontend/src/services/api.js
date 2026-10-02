@@ -172,5 +172,37 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/asistencias/resumen_dia/${params}`);
     if (!response.ok) throw new Error('Error al obtener métricas del día');
     return response.json();
+  },
+
+  // Novedades y Suspensiones de Clase
+  async getNovedades(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const response = await fetch(`${API_BASE_URL}/novedades/${query ? `?${query}` : ''}`);
+    if (!response.ok) throw new Error('Error al cargar novedades');
+    return response.json();
+  },
+
+  async registrarNovedadJornada(data) {
+    const response = await fetch(`${API_BASE_URL}/novedades/registrar_jornada/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(JSON.stringify(err));
+    }
+    return response.json();
+  },
+
+  async getResumenMensualNovedades(claseId, mes, anio) {
+    const params = new URLSearchParams({
+      clase: claseId,
+      ...(mes ? { mes } : {}),
+      ...(anio ? { anio } : {})
+    });
+    const response = await fetch(`${API_BASE_URL}/novedades/resumen_mensual/?${params.toString()}`);
+    if (!response.ok) throw new Error('Error al obtener resumen mensual de novedades');
+    return response.json();
   }
 };
