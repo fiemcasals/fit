@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import ActividadesList from './components/ActividadesList';
+import AlumnosList from './components/AlumnosList';
 import { Users, CalendarCheck, FileSpreadsheet } from 'lucide-react';
 
 export default function App() {
@@ -12,15 +13,7 @@ export default function App() {
 
       {activeTab === 'actividades' && <ActividadesList />}
 
-      {activeTab === 'alumnos' && (
-        <div className="empty-state">
-          <Users size={48} color="var(--color-primary)" style={{ margin: '0 auto 16px' }} />
-          <h3>Módulo de Alumnos (RF-02)</h3>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Este módulo se habilitará en el siguiente requerimiento secuencial del plan.
-          </p>
-        </div>
-      )}
+      {activeTab === 'alumnos' && <AlumnosList />}
 
       {activeTab === 'asistencia' && (
         <div className="empty-state">
