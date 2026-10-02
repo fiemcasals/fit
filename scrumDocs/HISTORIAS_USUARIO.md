@@ -1,6 +1,6 @@
 # Historias de Usuario -- fitPM
 
-_Generado automaticamente el 2026-10-02T15:31:56.659Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T15:36:41.567Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ## HU-01: Gestión de Clases, Horarios y Alumnos
 
@@ -34,3 +34,14 @@ Como profesor/coordinador quiero generar y exportar la planilla mensual de asist
 2. Muestra los presentes de cada alumno en los días en que hubo clase y totaliza las asistencias mensuales por alumno.
 3. Incluye en el reporte los encabezados oficiales requeridos: Secretaría de Deportes GCBA, Polideportivo, Actividad, Días y Horarios, Profesor, Mes y Año.
 4. Permite descargar/exportar el reporte en formato CSV compatible con la plantilla del GCBA y en formato descargable/imprimible.
+
+## HU-04: login
+
+tenemos que hacer el sistema de login completo, con registro, ingreso, recuperacion de contraseña. todo por correo electronico. 
+
+### Criterios de Aceptacion
+
+- 1. admita loguearse
+- 2. admita recuperar contraseña con correo electronico
+- 3. permita ingresar los datos de cada usuario con su correo y contraseña
+- 4. se pueda ver la contraseña por medio del "ojo"
