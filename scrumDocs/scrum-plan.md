@@ -1,6 +1,6 @@
 # Plan de Requerimientos — fitPM
 
-_Generado automáticamente el 2026-10-02T15:12:35.740Z — no editar a mano, se sobreescribe en cada publicación._
+_Generado automáticamente el 2026-10-02T15:13:24.163Z — no editar a mano, se sobreescribe en cada publicación._
 
 Orden sugerido de desarrollo (respeta dependencias entre Requerimientos). Cada fila indica de qué Requerimientos depende, si tiene.
 
@@ -22,7 +22,6 @@ Inicio de desarrollo del modelo y ABM de actividades y clases
 - Estimado: 1h
 
 ### RF-02 — Padrón y Asignación de Alumnos
-Desarrollando modelo de Alumnos, inscripciones a clases y UI de padrón
 - Estimado: 1h
 
 ### RF-01 — Pantalla de Toma de Asistencia Diaria
