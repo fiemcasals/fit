@@ -161,3 +161,20 @@ class NovedadClaseAPITest(APITestCase):
         self.assertEqual(alumno_data['dias']['5'], 'P')
         self.assertEqual(alumno_data['dias']['12'], 'A')
         self.assertEqual(alumno_data['total_asistencias'], 1)
+
+    def test_exportar_csv_planilla(self):
+        alumno = Alumno.objects.create(nombre="Diego", apellido="Maradona", dni="14111222")
+        alumno.clases.add(self.clase)
+        RegistroAsistencia.objects.create(clase=self.clase, alumno=alumno, fecha=date(2026, 8, 5), estado="presente")
+
+        url = f"{reverse('asistencia-exportar-csv')}?clase={self.clase.id}&mes=8&anio=2026"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response['Content-Type'], 'text/csv; charset=utf-8-sig')
+        self.assertIn('attachment; filename=', response['Content-Disposition'])
+
+        content = response.content.decode('utf-8-sig')
+        self.assertIn('SECRETARIA DE DEPORTES', content)
+        self.assertIn('GCBA', content)
+        self.assertIn('MARADONA', content)
+        self.assertIn('DIEGO', content)
