@@ -1,6 +1,6 @@
 # Grafo de Dependencias -- fitPM
 
-_Generado automaticamente el 2026-10-02T14:07:18.761Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T14:07:21.357Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ```mermaid
 graph TD
@@ -20,7 +20,6 @@ graph TD
     REQ_1790948668917["RF-01: Configuración de Virtual Host en Nginx y SSL"]
     REQ_1790949657375["RF-02: Configuración del Entorno de Ejecución y Servicio de la App"]
   end
-  REQ_1790949656542 --> REQ_1790949656650
   REQ_1790949656650 --> REQ_1790949656797
   REQ_1790949656797 --> REQ_1790949656976
   REQ_1790949656976 --> REQ_1790949657128
