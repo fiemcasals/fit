@@ -1,3 +1,11 @@
+<!--
+# Estándar de Arquitectura y Stack Tecnológico - fitPM
+- Backend: Python / Django + Django REST Framework + PostgreSQL
+- Frontend: React + Single Page Application
+- Contenerización: Docker & Docker Compose (servicios: backend, frontend, db)
+- Estilos: Sistema de diseño CSS moderno documentado a continuación.
+-->
+
 :root {
   /* Paleta Base */
   --color-primary: #006699;
