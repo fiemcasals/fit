@@ -1,13 +1,13 @@
 # Plan de Requerimientos — fitPM
 
-_Generado automáticamente el 2026-10-02T14:15:02.231Z — no editar a mano, se sobreescribe en cada publicación._
+_Generado automáticamente el 2026-10-02T15:12:35.740Z — no editar a mano, se sobreescribe en cada publicación._
 
 Orden sugerido de desarrollo (respeta dependencias entre Requerimientos). Cada fila indica de qué Requerimientos depende, si tiene.
 
 | Orden | Código | Requerimiento | Historia de Usuario | Módulo | Entrega | Estado | Desarrollador | Depende de | Rechazos |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | RF-01 | Modelo y ABM de Actividades / Clases | HU-01 | — | — | Haciendo | dev-fitpm | — | — |
-| 2 | RF-02 | Padrón y Asignación de Alumnos | HU-01 | — | — | Hacer | Sin asignar | RF-01 | — |
+| 1 | RF-01 | Modelo y ABM de Actividades / Clases | HU-01 | — | — | Hecho ✓ dev | dev-fitpm | — | — |
+| 2 | RF-02 | Padrón y Asignación de Alumnos | HU-01 | — | — | Haciendo | dev-fitpm | RF-01 | — |
 | 3 | RF-01 | Pantalla de Toma de Asistencia Diaria | HU-02 | — | — | Hacer | Sin asignar | RF-02 | — |
 | 4 | RF-02 | Registro de Novedades y Suspensiones de Clase | HU-02 | — | — | Hacer | Sin asignar | RF-01 | — |
 | 5 | RF-01 | Motor de Generación de Planilla Mensual Polideportivo GCBA | HU-03 | — | — | Hacer | Sin asignar | RF-02 | — |
@@ -22,6 +22,7 @@ Inicio de desarrollo del modelo y ABM de actividades y clases
 - Estimado: 1h
 
 ### RF-02 — Padrón y Asignación de Alumnos
+Desarrollando modelo de Alumnos, inscripciones a clases y UI de padrón
 - Estimado: 1h
 
 ### RF-01 — Pantalla de Toma de Asistencia Diaria
