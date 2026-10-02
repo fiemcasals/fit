@@ -1,6 +1,6 @@
 # Requerimientos -- fitPM
 
-_Generado automaticamente el 2026-10-02T15:31:57.707Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T15:36:42.793Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ## HU-01: Gestión de Clases, Horarios y Alumnos
 
