@@ -1,6 +1,6 @@
 # Historias de Usuario -- fitPM
 
-_Generado automaticamente el 2026-10-02T15:58:38.085Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T15:59:26.192Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ## HU-01: Gestión de Clases, Horarios y Alumnos
 
