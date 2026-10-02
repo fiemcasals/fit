@@ -1,13 +1,13 @@
 # Plan de Requerimientos — fitPM
 
-_Generado automáticamente el 2026-10-02T14:06:25.336Z — no editar a mano, se sobreescribe en cada publicación._
+_Generado automáticamente el 2026-10-02T14:06:30.474Z — no editar a mano, se sobreescribe en cada publicación._
 
 Orden sugerido de desarrollo (respeta dependencias entre Requerimientos). Cada fila indica de qué Requerimientos depende, si tiene.
 
 | Orden | Código | Requerimiento | Historia de Usuario | Módulo | Entrega | Estado | Desarrollador | Depende de | Rechazos |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | RF-01 | Modelo y ABM de Actividades / Clases | HU-01 | — | — | Hacer | dev-fitpm | — | — |
-| 2 | RF-02 | Padrón y Asignación de Alumnos | HU-01 | — | — | Hacer | dev-fitpm | RF-01 | — |
+| 2 | RF-02 | Padrón y Asignación de Alumnos | HU-01 | — | — | Hacer | dev-fitpm | — | — |
 | 3 | RF-01 | Pantalla de Toma de Asistencia Diaria | HU-02 | — | — | Hacer | dev-fitpm | RF-02 | — |
 | 4 | RF-02 | Registro de Novedades y Suspensiones de Clase | HU-02 | — | — | Hacer | dev-fitpm | RF-01 | — |
 | 5 | RF-01 | Motor de Generación de Planilla Mensual Polideportivo GCBA | HU-03 | — | — | Hacer | dev-fitpm | RF-02 | — |
