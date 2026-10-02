@@ -64,6 +64,18 @@ export default function PlanillaMensual() {
     }
   }, [selectedClaseId, mes, anio, loadMatriz]);
 
+  // Descarga directa del archivo CSV
+  const handleDescargarCsv = () => {
+    if (!selectedClaseId) return;
+    const url = api.getExportarCsvUrl(selectedClaseId, mes, anio);
+    window.open(url, '_blank');
+  };
+
+  // Imprimir o Guardar como PDF
+  const handleImprimir = () => {
+    window.print();
+  };
+
   const encabezado = dataMatriz?.encabezado;
   const diasInfo = dataMatriz?.dias_info || [];
   const alumnos = dataMatriz?.alumnos || [];
@@ -74,8 +86,9 @@ export default function PlanillaMensual() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '40px' }}>
-      {/* Selector de Parámetros */}
+      {/* Selector de Parámetros y Botones de Exportación */}
       <div
+        className="no-print"
         style={{
           background: 'var(--bg-surface)',
           padding: '20px',
@@ -88,10 +101,10 @@ export default function PlanillaMensual() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
           <div>
             <h2 style={{ margin: '0 0 4px 0', fontSize: '1.25rem', color: 'var(--color-primary)' }}>
-              📊 Motor de Generación de Planilla Mensual GCBA
+              📊 Generación y Exportación de Planillas GCBA
             </h2>
             <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-              Matriz oficial de asistencia con cálculo de presentismo del 1 al 31 para la Secretaría de Deportes.
+              Planilla oficial de asistencia mensual para Polideportivos (Secretaría de Deportes).
             </p>
           </div>
 
@@ -145,32 +158,64 @@ export default function PlanillaMensual() {
           </div>
         </div>
 
-        {/* Selector de Clase */}
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <label style={{ fontSize: '0.875rem', fontWeight: 600, minWidth: '60px' }}>
-            Clase:
-          </label>
-          <select
-            value={selectedClaseId}
-            onChange={(e) => setSelectedClaseId(e.target.value)}
-            style={{
-              flex: 1,
-              padding: '10px 14px',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-subtle)',
-              fontFamily: 'inherit',
-              fontSize: '0.925rem',
-              backgroundColor: 'var(--bg-app)',
-              color: 'var(--text-main)',
-              fontWeight: 600,
-            }}
-          >
-            {actividades.map((act) => (
-              <option key={act.id} value={act.id}>
-                {act.nombre} — {act.horario} ({Array.isArray(act.dias_semana) ? act.dias_semana.join(', ') : act.dias_semana}) | {act.polideportivo}
-              </option>
-            ))}
-          </select>
+        {/* Selector de Clase y Acciones de Descarga */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: 1, minWidth: '280px' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 600, minWidth: '60px' }}>
+              Clase:
+            </label>
+            <select
+              value={selectedClaseId}
+              onChange={(e) => setSelectedClaseId(e.target.value)}
+              style={{
+                flex: 1,
+                padding: '10px 14px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-subtle)',
+                fontFamily: 'inherit',
+                fontSize: '0.925rem',
+                backgroundColor: 'var(--bg-app)',
+                color: 'var(--text-main)',
+                fontWeight: 600,
+              }}
+            >
+              {actividades.map((act) => (
+                <option key={act.id} value={act.id}>
+                  {act.nombre} — {act.horario} ({Array.isArray(act.dias_semana) ? act.dias_semana.join(', ') : act.dias_semana}) | {act.polideportivo}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              className="btn"
+              onClick={handleDescargarCsv}
+              disabled={loading || !dataMatriz}
+              style={{
+                backgroundColor: 'var(--color-primary)',
+                color: '#ffffff',
+                padding: '10px 18px',
+                boxShadow: '0 2px 8px rgba(0, 102, 153, 0.25)',
+              }}
+            >
+              📥 Descargar CSV (GCBA)
+            </button>
+
+            <button
+              className="btn"
+              onClick={handleImprimir}
+              disabled={loading || !dataMatriz}
+              style={{
+                backgroundColor: 'var(--color-accent)',
+                color: '#ffffff',
+                padding: '10px 18px',
+                boxShadow: '0 2px 8px rgba(0, 194, 203, 0.25)',
+              }}
+            >
+              🖨️ Imprimir / Guardar PDF
+            </button>
+          </div>
         </div>
       </div>
 
@@ -198,6 +243,7 @@ export default function PlanillaMensual() {
         </div>
       ) : dataMatriz ? (
         <div
+          className="printable-sheet"
           style={{
             background: 'var(--bg-surface)',
             borderRadius: 'var(--radius-md)',

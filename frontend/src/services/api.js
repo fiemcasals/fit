@@ -216,5 +216,14 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/asistencias/matriz_mensual/?${params.toString()}`);
     if (!response.ok) throw new Error('Error al generar matriz mensual');
     return response.json();
+  },
+
+  getExportarCsvUrl(claseId, mes, anio) {
+    const params = new URLSearchParams({
+      clase: claseId,
+      ...(mes ? { mes } : {}),
+      ...(anio ? { anio } : {})
+    });
+    return `${API_BASE_URL}/asistencias/exportar_csv/?${params.toString()}`;
   }
 };

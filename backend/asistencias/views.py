@@ -316,6 +316,95 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
             'total_alumnos_inscriptos': len(filas_alumnos)
         })
 
+    @action(detail=False, methods=['get'])
+    def exportar_csv(self, request):
+        """
+        Exportación de Planilla Mensual Polideportivo GCBA a CSV (RF-06 / REQ-1790949657258).
+        Genera archivo CSV estructurado con formato idéntico a la plantilla oficial de la Secretaría de Deportes.
+        """
+        import csv
+        from django.http import HttpResponse
+        import calendar
+
+        clase_id = request.query_params.get('clase')
+        mes = int(request.query_params.get('mes') or date.today().month)
+        anio = int(request.query_params.get('anio') or date.today().year)
+
+        if not clase_id:
+            return Response({'error': 'El parámetro clase es obligatorio'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            clase = Actividad.objects.get(id=clase_id)
+        except Actividad.DoesNotExist:
+            return Response({'error': 'Clase no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+        MESES = [
+            '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ]
+
+        # Configurar respuesta HTTP con CSV UTF-8 con BOM para correcta apertura en Excel
+        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+        filename = f"planilla_asistencia_{clase.nombre.replace(' ', '_')}_{MESES[mes]}_{anio}.csv"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        writer = csv.writer(response)
+
+        # Encabezados oficiales GCBA
+        writer.writerow(['', '', 'SECRETARIA DE DEPORTES'] + [''] * 27)
+        writer.writerow(['', '', 'GCBA'] + [''] * 27)
+        writer.writerow([''] * 30)
+        writer.writerow(['', f'PLANILLA DE ASISTENCIA - POLIDEPORTIVO {clase.polideportivo.upper()}'] + [''] * 28)
+        writer.writerow(['', 'ID', '', str(clase.id), '', '', '', f'MES: {MESES[mes].upper()}', '', '', '', '', '', '', '', f'AÑO: {anio}'] + [''] * 14)
+        
+        dias_lista = clase.dias_semana if isinstance(clase.dias_semana, list) else [str(clase.dias_semana)]
+        dias_str = ", ".join(dias_lista) if dias_lista else "Lunes, Miércoles, Viernes"
+        writer.writerow(['', f'ACTIVIDAD: {clase.nombre}', '', '', '', '', '', '', '', '', '', f'DIAS Y HORARIOS: {dias_str} {clase.horario}'] + [''] * 17)
+        writer.writerow(['', f'PROFESOR: {clase.profesor}'] + [''] * 28)
+        writer.writerow([''] * 30)
+
+        # Fila de Columnas (Nº, APELLIDO, NOMBRE, 1..31, TOTAL)
+        header_cols = ['Nº', 'APELLIDO', 'NOMBRE'] + [str(i) for i in range(1, 32)] + ['TOTAL']
+        writer.writerow(header_cols)
+
+        # Datos de alumnos y cálculo de asistencias
+        _, dias_en_mes = calendar.monthrange(anio, mes)
+        alumnos = clase.alumnos.filter(activo=True).order_by('apellido', 'nombre')
+        registros_mes = RegistroAsistencia.objects.filter(clase=clase, fecha__year=anio, fecha__month=mes)
+        
+        asistencias_map = {}
+        for reg in registros_mes:
+            asistencias_map[(reg.alumno_id, reg.fecha.day)] = reg.estado
+
+        totales_por_dia = {dia: 0 for dia in range(1, 32)}
+
+        for idx, alumno in enumerate(alumnos, start=1):
+            row = [str(idx), alumno.apellido.upper(), alumno.nombre.upper()]
+            total_alumno = 0
+
+            for dia in range(1, 32):
+                if dia <= dias_en_mes:
+                    estado = asistencias_map.get((alumno.id, dia))
+                    if estado == 'presente':
+                        row.append('P')
+                        total_alumno += 1
+                        totales_por_dia[dia] += 1
+                    elif estado == 'ausente':
+                        row.append('A')
+                    else:
+                        row.append('')
+                else:
+                    row.append('')
+
+            row.append(str(total_alumno))
+            writer.writerow(row)
+
+        # Fila de Totales por Día
+        total_row = ['TOTAL', 'PRESENTES', 'POR DÍA'] + [str(totales_por_dia[d]) if d <= dias_en_mes else '' for d in range(1, 32)] + [str(sum(totales_por_dia.values()))]
+        writer.writerow(total_row)
+
+        return response
+
 
 class NovedadClaseViewSet(viewsets.ModelViewSet):
     """
