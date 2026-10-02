@@ -141,3 +141,23 @@ class NovedadClaseAPITest(APITestCase):
         self.assertEqual(response.data['clases_suspendidas'], 2)
         self.assertEqual(response.data['desglose']['suspendida_luz'], 1)
         self.assertEqual(response.data['desglose']['suspendida_clima'], 1)
+
+    def test_matriz_mensual_generacion(self):
+        alumno = Alumno.objects.create(nombre="Carlos", apellido="Tevez", dni="31222333")
+        alumno.clases.add(self.clase)
+        RegistroAsistencia.objects.create(clase=self.clase, alumno=alumno, fecha=date(2026, 8, 5), estado="presente")
+        RegistroAsistencia.objects.create(clase=self.clase, alumno=alumno, fecha=date(2026, 8, 12), estado="ausente")
+
+        url = f"{reverse('asistencia-matriz-mensual')}?clase={self.clase.id}&mes=8&anio=2026"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('encabezado', response.data)
+        self.assertEqual(response.data['encabezado']['organismo'], 'SECRETARIA DE DEPORTES')
+        self.assertEqual(response.data['encabezado']['mes_nombre'], 'Agosto')
+        self.assertEqual(response.data['total_alumnos_inscriptos'], 1)
+        
+        alumno_data = response.data['alumnos'][0]
+        self.assertEqual(alumno_data['apellido'], 'Tevez')
+        self.assertEqual(alumno_data['dias']['5'], 'P')
+        self.assertEqual(alumno_data['dias']['12'], 'A')
+        self.assertEqual(alumno_data['total_asistencias'], 1)

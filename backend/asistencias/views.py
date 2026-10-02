@@ -178,6 +178,144 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
             'porcentaje_asistencia': round((presentes / total * 100), 1) if total > 0 else 0
         })
 
+    @action(detail=False, methods=['get'])
+    def matriz_mensual(self, request):
+        """
+        Motor de Generación de Planilla Mensual Polideportivo GCBA (RF-05 / REQ-1790949657128).
+        Genera la matriz mensual con columnas del día 1 al 31 y filas por alumno,
+        cálculo automático de presentes totales por alumno y encabezados oficiales GCBA.
+        """
+        import calendar
+        from .models import NovedadClase
+
+        clase_id = request.query_params.get('clase')
+        mes = int(request.query_params.get('mes') or date.today().month)
+        anio = int(request.query_params.get('anio') or date.today().year)
+
+        if not clase_id:
+            return Response({'error': 'El parámetro clase es obligatorio'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            clase = Actividad.objects.get(id=clase_id)
+        except Actividad.DoesNotExist:
+            return Response({'error': 'Clase no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+        MESES = [
+            '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ]
+        DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+
+        # Días en el mes
+        _, dias_en_mes = calendar.monthrange(anio, mes)
+
+        # Determinar días programados de la actividad
+        dias_lista = clase.dias_semana if isinstance(clase.dias_semana, list) else [str(clase.dias_semana)]
+        dias_programados = [d.strip().lower() for d in dias_lista if d.strip()]
+        dias_str = ", ".join(dias_lista) if dias_lista else "Lunes, Miércoles, Viernes"
+
+        # Mapeo de días de la semana y novedades
+        dias_info = []
+        novedades_mes = {
+            n.fecha.day: n
+            for n in NovedadClase.objects.filter(clase=clase, fecha__year=anio, fecha__month=mes)
+        }
+
+        for dia in range(1, dias_en_mes + 1):
+            fecha_dia = date(anio, mes, dia)
+            nombre_dia = DIAS_SEMANA[fecha_dia.weekday()]
+            es_programado = any(d in nombre_dia.lower() for d in dias_programados) or len(dias_programados) == 0
+            novedad_dia = novedades_mes.get(dia)
+
+            dias_info.append({
+                'numero': dia,
+                'fecha': str(fecha_dia),
+                'dia_semana': nombre_dia[:2],
+                'dia_semana_completo': nombre_dia,
+                'es_programado': es_programado,
+                'estado_jornada': novedad_dia.estado_clase if novedad_dia else ('normal' if es_programado else 'sin_clase'),
+                'es_computable': novedad_dia.es_computable if novedad_dia else es_programado
+            })
+
+        # Alumnos inscriptos
+        alumnos = clase.alumnos.filter(activo=True).order_by('apellido', 'nombre')
+
+        # Asistencias del mes
+        registros_mes = RegistroAsistencia.objects.filter(
+            clase=clase,
+            fecha__year=anio,
+            fecha__month=mes
+        )
+        asistencias_map = {}
+        for reg in registros_mes:
+            key = (reg.alumno_id, reg.fecha.day)
+            asistencias_map[key] = reg.estado
+
+        # Construir matriz de filas por alumno
+        filas_alumnos = []
+        totales_por_dia = {dia: 0 for dia in range(1, 32)}
+
+        for idx, alumno in enumerate(alumnos, start=1):
+            dias_alumno = {}
+            total_presentes_alumno = 0
+
+            for dia in range(1, 32):
+                if dia <= dias_en_mes:
+                    estado_reg = asistencias_map.get((alumno.id, dia))
+                    dia_meta = dias_info[dia - 1]
+
+                    if estado_reg == 'presente':
+                        simbolo = 'P'
+                        total_presentes_alumno += 1
+                        totales_por_dia[dia] += 1
+                    elif estado_reg == 'ausente':
+                        simbolo = 'A'
+                    elif not dia_meta['es_computable'] and dia_meta['estado_jornada'] != 'sin_clase':
+                        simbolo = 'S' # Suspendida
+                    elif dia_meta['es_programado']:
+                        simbolo = '' # Día de clase sin registrar aún
+                    else:
+                        simbolo = '-' # Sin clase programada
+                else:
+                    simbolo = '' # Meses de menos de 31 días
+
+                dias_alumno[str(dia)] = simbolo
+
+            filas_alumnos.append({
+                'nro': idx,
+                'alumno_id': alumno.id,
+                'apellido': alumno.apellido,
+                'nombre': alumno.nombre,
+                'nombre_completo': alumno.nombre_completo,
+                'dni': alumno.dni or '',
+                'dias': dias_alumno,
+                'total_asistencias': total_presentes_alumno
+            })
+
+        total_general_asistencias = sum(a['total_asistencias'] for a in filas_alumnos)
+
+        return Response({
+            'encabezado': {
+                'organismo': 'SECRETARIA DE DEPORTES',
+                'subtitulo': 'GCBA',
+                'titulo': 'PLANILLA DE ASISTENCIA - POLIDEPORTIVO',
+                'polideportivo': clase.polideportivo or 'Polideportivo Patricios',
+                'id_actividad': clase.id,
+                'actividad': clase.nombre,
+                'dias_y_horarios': f"{dias_str} {clase.horario}",
+                'profesor': clase.profesor or 'Prof. Asignado',
+                'mes_numero': mes,
+                'mes_nombre': MESES[mes],
+                'anio': anio,
+                'dias_en_mes': dias_en_mes
+            },
+            'dias_info': dias_info,
+            'alumnos': filas_alumnos,
+            'totales_por_dia': {str(k): v for k, v in totales_por_dia.items()},
+            'total_general_asistencias': total_general_asistencias,
+            'total_alumnos_inscriptos': len(filas_alumnos)
+        })
+
 
 class NovedadClaseViewSet(viewsets.ModelViewSet):
     """

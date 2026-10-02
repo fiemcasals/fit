@@ -204,5 +204,17 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/novedades/resumen_mensual/?${params.toString()}`);
     if (!response.ok) throw new Error('Error al obtener resumen mensual de novedades');
     return response.json();
+  },
+
+  // Planillas Mensuales GCBA
+  async getMatrizMensual(claseId, mes, anio) {
+    const params = new URLSearchParams({
+      clase: claseId,
+      ...(mes ? { mes } : {}),
+      ...(anio ? { anio } : {})
+    });
+    const response = await fetch(`${API_BASE_URL}/asistencias/matriz_mensual/?${params.toString()}`);
+    if (!response.ok) throw new Error('Error al generar matriz mensual');
+    return response.json();
   }
 };
