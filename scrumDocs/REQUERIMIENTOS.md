@@ -1,6 +1,6 @@
 # Requerimientos -- fitPM
 
-_Generado automaticamente el 2026-10-02T15:13:26.604Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T15:30:21.443Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ## HU-01: Gestión de Clases, Horarios y Alumnos
 
@@ -10,7 +10,9 @@ Definición de actividad (ej. Deporte / Taller), sede / polideportivo, días de 
 
 **Condiciones de aprobación**
 
-_Sin condiciones de aprobación cargadas: pedíselas al Project Manager o al Scrum Master antes de darlo por terminado._
+1. Permite crear, editar, listar y eliminar actividades deportivas indicando nombre, sede/polideportivo, profesor, días de clase y franja horaria.
+2. Valida que el nombre, horario y al menos un día sean obligatorios.
+3. Provee endpoints REST para consulta con filtros por día, sede y horario.
 
 ### RF-02: Padrón y Asignación de Alumnos (Funcional)
 
@@ -18,7 +20,9 @@ Registro de alumnos (Nombre, Apellido, datos de contacto) e inscripción / asoci
 
 **Condiciones de aprobación**
 
-_Sin condiciones de aprobación cargadas: pedíselas al Project Manager o al Scrum Master antes de darlo por terminado._
+1. Permite registrar y editar alumnos con nombre, apellido, DNI, datos de contacto y observaciones médicas.
+2. Permite inscribir y desinscribir alumnos de una o múltiples clases.
+3. Permite filtrar la lista de alumnos por clase y buscar por nombre o DNI.
 
 ## HU-02: Toma de Asistencia Rápida por Clase
 
@@ -28,7 +32,9 @@ Selector de fecha y clase activa; grilla/lista táctil de alumnos con toggle rá
 
 **Condiciones de aprobación**
 
-_Sin condiciones de aprobación cargadas: pedíselas al Project Manager o al Scrum Master antes de darlo por terminado._
+1. Permite seleccionar una fecha y una clase para cargar la nómina de alumnos inscriptos.
+2. Permite alternar el estado Presente / Ausente de cada alumno con un solo toque y persistirlo inmediatamente.
+3. Muestra el resumen de presentes y ausentes de la clase en tiempo real.
 
 ### RF-02: Registro de Novedades y Suspensiones de Clase (Funcional)
 
@@ -36,7 +42,9 @@ Posibilidad de registrar eventos especiales sobre el día de clase (ej. Suspendi
 
 **Condiciones de aprobación**
 
-_Sin condiciones de aprobación cargadas: pedíselas al Project Manager o al Scrum Master antes de darlo por terminado._
+1. Permite registrar novedades del día de clase (clase normal, suspendida por corte de luz, feriado, lluvia/clima u otra causa).
+2. Guarda observaciones del docente sobre la jornada.
+3. Afecta el cómputo de días válidos de clase del mes.
 
 ## HU-03: Generación y Exportación de Planillas Oficiales de Asistencia
 
@@ -46,7 +54,9 @@ Vista matriz mensual (días 1 al 31) consolidando asistencias, inasistencias y t
 
 **Condiciones de aprobación**
 
-_Sin condiciones de aprobación cargadas: pedíselas al Project Manager o al Scrum Master antes de darlo por terminado._
+1. Genera una matriz mensual con columnas de días 1 al 31 y filas por alumno según formato oficial GCBA.
+2. Muestra los presentes por día de clase y calcula automáticamente el total de asistencias del mes por alumno.
+3. Incluye los encabezados oficiales de la Secretaría de Deportes, Polideportivo, Actividad, Mes, Año y Profesor.
 
 ### RF-02: Exportación y Descarga de Planillas (CSV / Excel / PDF) (Funcional)
 
@@ -54,7 +64,9 @@ Exportación directa del reporte mensual respetando los encabezados oficiales (S
 
 **Condiciones de aprobación**
 
-_Sin condiciones de aprobación cargadas: pedíselas al Project Manager o al Scrum Master antes de darlo por terminado._
+1. Permite exportar la planilla mensual a archivo CSV compatible con la plantilla de Deportes GCBA.
+2. Permite descargar o imprimir el reporte en formato PDF/imprimible con formato oficial.
+3. Valida que el archivo descargado contenga todos los datos y encabezados correctos.
 
 ## RO-01: Configuración de Infraestructura y Despliegue en VPS
 
@@ -64,7 +76,9 @@ Creación del archivo de configuración en Nginx para el nuevo dominio, proxy re
 
 **Condiciones de aprobación**
 
-_Sin condiciones de aprobación cargadas: pedíselas al Project Manager o al Scrum Master antes de darlo por terminado._
+1. Archivo de configuración de Nginx para el nuevo dominio con proxy_pass al puerto de la aplicación.
+2. Certificado SSL activo (Let's Encrypt / Certbot) con redirección automática HTTP -> HTTPS.
+3. Verificación de respuesta 200 OK en el dominio por HTTPS.
 
 ### RF-02: Configuración del Entorno de Ejecución y Servicio de la App (Funcional)
 
@@ -72,4 +86,6 @@ Configuración de variables de entorno de producción, script de inicio/daemon (
 
 **Condiciones de aprobación**
 
-_Sin condiciones de aprobación cargadas: pedíselas al Project Manager o al Scrum Master antes de darlo por terminado._
+1. Variables de entorno de producción configuradas y seguras.
+2. Servicio systemd o contenedor Docker Compose activo en el VPS con reinicio automático.
+3. Conectividad y persistencia de base de datos PostgreSQL verificada.
