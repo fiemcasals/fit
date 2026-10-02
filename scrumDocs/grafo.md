@@ -1,6 +1,6 @@
 # Grafo de Dependencias -- fitPM
 
-_Generado automaticamente el 2026-10-02T14:06:52.831Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T14:06:58.739Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ```mermaid
 graph TD
