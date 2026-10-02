@@ -1,6 +1,6 @@
 # Grafo de Dependencias -- fitPM
 
-_Generado automaticamente el 2026-10-02T14:07:44.571Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T14:07:50.972Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ```mermaid
 graph TD
@@ -26,4 +26,5 @@ graph TD
   REQ_1790949656976 --> REQ_1790949657128
   REQ_1790949657128 --> REQ_1790949657258
   REQ_1790949657258 --> REQ_1790948668917
+  REQ_1790948668917 --> REQ_1790949657375
 ```
