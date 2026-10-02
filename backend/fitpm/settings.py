@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     # Apps
     'actividades',
     'alumnos',
+    'asistencias',
 ]
 
 MIDDLEWARE = [

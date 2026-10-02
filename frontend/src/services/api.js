@@ -129,5 +129,48 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/alumnos/resumen/`);
     if (!response.ok) throw new Error('Error al cargar estadísticas de alumnos');
     return response.json();
+  },
+
+  // Asistencias
+  async getPlanillaClase(claseId, fecha) {
+    const params = new URLSearchParams({ clase: claseId, ...(fecha ? { fecha } : {}) });
+    const response = await fetch(`${API_BASE_URL}/asistencias/planilla_clase/?${params.toString()}`);
+    if (!response.ok) throw new Error('Error al cargar planilla de clase');
+    return response.json();
+  },
+
+  async toggleAsistencia(claseId, alumnoId, fecha, estado) {
+    const response = await fetch(`${API_BASE_URL}/asistencias/toggle/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clase_id: claseId,
+        alumno_id: alumnoId,
+        fecha,
+        estado
+      })
+    });
+    if (!response.ok) throw new Error('Error al alternar asistencia');
+    return response.json();
+  },
+
+  async guardarLoteAsistencias(data) {
+    const response = await fetch(`${API_BASE_URL}/asistencias/guardar_lote/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(JSON.stringify(err));
+    }
+    return response.json();
+  },
+
+  async getResumenDia(fecha) {
+    const params = fecha ? `?fecha=${fecha}` : '';
+    const response = await fetch(`${API_BASE_URL}/asistencias/resumen_dia/${params}`);
+    if (!response.ok) throw new Error('Error al obtener métricas del día');
+    return response.json();
   }
 };
