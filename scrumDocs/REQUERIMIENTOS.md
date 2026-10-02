@@ -1,6 +1,6 @@
 # Requerimientos -- fitPM
 
-_Generado automaticamente el 2026-10-02T13:45:06.987Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T13:58:58.856Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ## RO-01: Configuración de Infraestructura y Despliegue en VPS
 
