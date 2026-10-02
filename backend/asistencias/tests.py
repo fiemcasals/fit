@@ -102,3 +102,42 @@ class AsistenciaAPITest(APITestCase):
         self.assertEqual(response.data['presentes'], 1)
         self.assertEqual(response.data['ausentes'], 1)
         self.assertEqual(response.data['porcentaje_asistencia'], 50.0)
+
+
+class NovedadClaseAPITest(APITestCase):
+    """Pruebas para registro de novedades y suspensiones de clase (RF-04 / REQ-1790949656976)."""
+    def setUp(self):
+        self.clase = Actividad.objects.create(
+            nombre="Fútbol 19hs",
+            polideportivo="Polideportivo Chacabuco",
+            horario="19:00"
+        )
+
+    def test_registrar_jornada_normal(self):
+        url = reverse('novedad-registrar-jornada')
+        data = {
+            "clase_id": self.clase.id,
+            "fecha": "2026-08-12",
+            "estado_clase": "normal",
+            "observaciones": "Clase dictada con normalidad"
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['estado_clase'], 'normal')
+        self.assertTrue(response.data['es_computable'])
+
+    def test_registrar_jornada_suspendida_y_resumen(self):
+        from .models import NovedadClase
+        NovedadClase.objects.create(clase=self.clase, fecha=date(2026, 8, 5), estado_clase="normal")
+        NovedadClase.objects.create(clase=self.clase, fecha=date(2026, 8, 12), estado_clase="suspendida_luz", observaciones="Corte general Edenor")
+        NovedadClase.objects.create(clase=self.clase, fecha=date(2026, 8, 19), estado_clase="suspendida_clima", observaciones="Tormenta fuerte")
+        NovedadClase.objects.create(clase=self.clase, fecha=date(2026, 8, 26), estado_clase="normal")
+
+        url = f"{reverse('novedad-resumen-mensual')}?clase={self.clase.id}&mes=8&anio=2026"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['total_jornadas_registradas'], 4)
+        self.assertEqual(response.data['clases_dictadas'], 2)
+        self.assertEqual(response.data['clases_suspendidas'], 2)
+        self.assertEqual(response.data['desglose']['suspendida_luz'], 1)
+        self.assertEqual(response.data['desglose']['suspendida_clima'], 1)

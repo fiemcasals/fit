@@ -37,3 +37,27 @@ class BulkAsistenciaSerializer(serializers.Serializer):
     clase_id = serializers.IntegerField()
     fecha = serializers.DateField()
     asistencias = BulkAsistenciaItemSerializer(many=True)
+
+
+class NovedadClaseSerializer(serializers.ModelSerializer):
+    """Serializer para el registro de novedades y suspensiones de jornada de clase."""
+    clase_detalle = ActividadSerializer(source='clase', read_only=True)
+    estado_display = serializers.CharField(source='get_estado_clase_display', read_only=True)
+    es_computable = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        from .models import NovedadClase
+        model = NovedadClase
+        fields = [
+            'id',
+            'clase',
+            'clase_detalle',
+            'fecha',
+            'estado_clase',
+            'estado_display',
+            'es_computable',
+            'observaciones',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
