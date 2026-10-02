@@ -1,6 +1,6 @@
 # Requerimientos -- fitPM
 
-_Generado automaticamente el 2026-10-02T15:31:30.945Z -- no editar a mano, se sobreescribe en cada publicacion._
+_Generado automaticamente el 2026-10-02T15:31:57.707Z -- no editar a mano, se sobreescribe en cada publicacion._
 
 ## HU-01: Gestión de Clases, Horarios y Alumnos
 
@@ -20,9 +20,9 @@ Registro de alumnos (Nombre, Apellido, datos de contacto) e inscripción / asoci
 
 **Condiciones de aprobación**
 
-1. Permite registrar y editar alumnos con nombre, apellido, DNI, datos de contacto y observaciones médicas.
-2. Permite inscribir y desinscribir alumnos de una o múltiples clases.
-3. Permite filtrar la lista de alumnos por clase y buscar por nombre o DNI.
+1. Registrar y editar alumnos con nombre y DNI.
+2. Inscribir y desinscribir de clases.
+3. Filtrar por clase y buscar.
 
 ## HU-02: Toma de Asistencia Rápida por Clase
 
