@@ -1,6 +1,6 @@
 # QA — qué podés hacer en este proyecto
 
-_Generado automáticamente el 2026-10-02T13:45:23.378Z -- no editar a mano, se sobreescribe en cada publicación._
+_Generado automáticamente el 2026-10-09T14:44:40.695Z -- no editar a mano, se sobreescribe en cada publicación._
 
 Este es el documento de **tu** rol. El procedimiento paso a paso está en
 `.claude/skills/qa-sync/SKILL.md`.
@@ -42,6 +42,8 @@ lo que pruebes de él vale hasta ahí, y así hay que decirlo. Las `precondition
 Requerimiento del que dependen, por código** — "RF-01 (registro) probado y en verde", no
 "usuario autenticado".
 
+**Cómo se redacta cada Test está en `scrumDocs/ESTANDAR-DE-PRUEBAS.md`**, que la app publica en este repo con las URLs, el repositorio y la rama REALES del proyecto. Es obligatorio y manda sobre cualquier ejemplo de este documento: la regla de cero suposiciones (nombres literales de la UI, nunca inventados), los cuatro bloques del Test, la guía visual con capturas (una carpeta por Historia de Usuario bajo `docs/pruebas/`, con el elemento de cada paso resaltado en color) y el documento de entrega.
+
 ## Las tuyas son las de integración
 
 Cada Requerimiento tiene dos juegos de pruebas. Las de **`desarrollo`** las corrió el
@@ -66,7 +68,7 @@ cobertura.
 
 La de **estrés** la escribís vos, en `scrumDocs/tests/<CODIGO>-carga.sh`, commiteada. Que
 imprima cuántas corridas, cuántas fallaron y cuánto tardó la más lenta. No la confundas con
-`scrumDocs/entregas/<CODIGO>.sh --carga N`: esa es del developer y estresa **su** flujo.
+`docs/pruebas/<historia>/<CODIGO>-entrega.sh --carga N`: esa es del developer y estresa **su** flujo.
 
 ## Sin evidencia no hay veredicto
 
@@ -108,8 +110,8 @@ queda corto sin que se vea por qué.
 
 ## Lo que tenés derecho a recibir
 
-Un Requerimiento entregado trae tres cosas: el documento `scrumDocs/entregas/<CODIGO>.md`,
-el script `scrumDocs/entregas/<CODIGO>.sh` —que recorre el flujo integrado y con `--carga N`
+Un Requerimiento entregado trae tres cosas: el documento `docs/pruebas/<historia>/<CODIGO>-entrega.md`,
+el script `docs/pruebas/<historia>/<CODIGO>-entrega.sh` —que recorre el flujo integrado y con `--carga N`
 lo repite midiendo— y **sus Tests de integración ya preparados**, con pasos y datos, listos
 para que les des correr. La vara del developer es que vos puedas probar sin preguntarle
 nada.
