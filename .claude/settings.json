@@ -50,7 +50,12 @@
       "Write(scrumDocs/**)",
       "Edit(scrumDocs/**)",
       "Read(//tmp/**)",
-      "Write(//tmp/**)"
+      "Write(//tmp/**)",
+      "Bash(bash docs/pruebas/*)",
+      "Bash(chmod +x docs/pruebas/*)",
+      "Write(docs/**)",
+      "Edit(docs/**)",
+      "Bash(mkdir -p docs/*)"
     ],
     "deny": [
       "Read(.env)",
