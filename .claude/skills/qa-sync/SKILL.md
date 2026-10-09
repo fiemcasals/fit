@@ -19,6 +19,8 @@ mano, este skill lee el **código real de este repo** (rutas, controllers, seria
 para proponer pasos que apuntan a endpoints que efectivamente existen — con método, body
 y código esperado reales, no inventados.
 
+**Cómo se redacta cada Test está en `scrumDocs/ESTANDAR-DE-PRUEBAS.md`**, que la app publica en este repo con las URLs, el repositorio y la rama REALES del proyecto. Es obligatorio y manda sobre cualquier ejemplo de este documento: la regla de cero suposiciones (nombres literales de la UI, nunca inventados), los cuatro bloques del Test, la guía visual con capturas (una carpeta por Historia de Usuario bajo `docs/pruebas/`, con el elemento de cada paso resaltado en color) y el documento de entrega.
+
 **Alcance deliberadamente angosto**: sólo Tests (`name`, `type`, `preconditions`,
 `expectedResult`, `criterionIndex`, `verification.steps`) y su veredicto. Lee los
 Requerimientos para saber a cuál colgar cada test, pero nunca los crea ni edita — igual que
@@ -207,11 +209,11 @@ trabajo que el programador ya hizo, y devolvérselo es más barato que repetirlo
 
 Cada Requerimiento entregado deja dos archivos:
 
-- `scrumDocs/entregas/<CODIGO>.md` — qué quedó implementado, cómo se levanta y se prueba,
+- `docs/pruebas/<historia>/<CODIGO>-entrega.md` — qué quedó implementado, cómo se levanta y se prueba,
   qué datos hacen falta, qué endpoints o pantallas toca, **cómo se corre integrado**, y
   **qué quedó afuera o se asumió**.
-- `scrumDocs/entregas/<CODIGO>.sh` — el script que recorre el flujo completo ya integrado,
-  prepara sus datos y los limpia. Corre con `bash scrumDocs/entregas/<CODIGO>.sh`, y con
+- `docs/pruebas/<historia>/<CODIGO>-entrega.sh` — el script que recorre el flujo completo ya integrado,
+  prepara sus datos y los limpia. Corre con `bash docs/pruebas/<historia>/<CODIGO>-entrega.sh`, y con
   `--carga N` repite el recorrido N veces reportando cuántas fallaron y cuánto tardó la más
   lenta. **Corrélo antes de tocar nada**: te dice en un comando si lo integrado se sostiene,
   y el modo carga es lo único que muestra lo que aparece recién bajo uso.
